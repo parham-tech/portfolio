@@ -1,7 +1,12 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
+import Home from "./pages/Home";
+import Skills from "./pages/Skills";
+import Projects from "./pages/Projects";
+import Contact from "./pages/Contact";
 import useThemeFadeMultiUltra from "./hooks/useThemeFadeMulti";
+import Hero from "./components/Hero";
 
 function App() {
   const [transMs, setTransMs] = useState(700);
@@ -10,20 +15,17 @@ function App() {
     theme,
     setThemeWithFade,
     setThemeForSection,
-    removeSection, // اضافه شده
+    removeSection,
     layers,
-    sectionThemes, // تم‌های مستقل هر بخش
+    sectionThemes,
     durationStyle,
-  } = useThemeFadeMultiUltra("default", transMs, ["site"]); 
-  // ⚠️ اینجا فقط site رو مقداردهی اولیه می‌کنیم
-  // => hero دیفالت لایه نداره مگر اینکه کاربر خودش فعالش کنه
+  } = useThemeFadeMultiUltra("default", transMs, ["site"]);
 
   const themeClasses = {
     default: "bg-day-gradient",
     retro: "bg-green-gradient",
     cyberpunk: "bg-purple-gradient",
     valentine: "bg-pink-gradient",
-    aqua: "bg-blue-gradient",
     dark: "bg-gray-900",
   };
 
@@ -32,54 +34,63 @@ function App() {
     retro: "bg-hero-green",
     cyberpunk: "bg-hero-purple",
     valentine: "bg-hero-pink",
-    aqua: "bg-hero-blue",
     dark: "bg-gray-800",
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <Router>
       {/* بک‌گراند سایت */}
       {layers.site?.map((l) => (
         <div
           key={l.id}
-          className={`absolute inset-0 pointer-events-none transition-opacity ${
-            l.visible ? "opacity-100" : "opacity-0"
-          } ${themeClasses[l.theme]}`}
+          className={`absolute inset-0 pointer-events-none transition-opacity ${l.visible ? "opacity-100" : "opacity-0"} ${themeClasses[l.theme]}`}
           style={durationStyle}
         />
       ))}
 
-      <div className="relative z-10">
+      <div className="relative z-10 min-h-screen">
         {/* Navbar */}
         <Navbar
           theme={theme}
           setTheme={setThemeWithFade}
           setThemeForSection={setThemeForSection}
-          removeSection={removeSection} // پاس دادن برای خاموش کردن hero
+          removeSection={removeSection}
           themeClasses={themeClasses}
           transMs={transMs}
           setTransMs={setTransMs}
           layers={layers}
-          sectionThemes={sectionThemes} // پاس دادن تم‌های بخش‌ها
+          sectionThemes={sectionThemes}
         />
 
-        {/* Hero (فقط وقتی کاربر فعالش کرده باشه) */}
-        <div className="relative min-h-[60vh] overflow-hidden mt-6">
-          {layers.hero?.map((l) => (
-            <div
-              key={l.id}
-              className={`absolute inset-0 transition-opacity ${
-                l.visible ? "opacity-100" : "opacity-0"
-              } ${heroClasses[l.theme]}`}
-              style={durationStyle}
-            />
-          ))}
-          <div className="relative z-10">
-            <Hero />
-          </div>
-        </div>
+        {/* Routes */}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                {/* Hero فقط روی صفحه Home */}
+                <div className="relative min-h-[60vh] overflow-hidden mt-6">
+                  {layers.hero?.map((l) => (
+                    <div
+                      key={l.id}
+                      className={`absolute inset-0 transition-opacity ${l.visible ? "opacity-100" : "opacity-0"} ${heroClasses[l.theme]}`}
+                      style={durationStyle}
+                    />
+                  ))}
+                  <div className="relative z-10">
+                    <Hero />
+                  </div>
+                </div>
+                <Home />
+              </>
+            }
+          />
+          <Route path="/skills" element={<Skills />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 }
 

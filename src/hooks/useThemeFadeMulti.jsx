@@ -1,10 +1,11 @@
+// hooks/useThemeFadeMulti.jsx
 import { useState, useRef, useEffect } from "react";
 
 /**
  * useThemeFadeMulti
  * - initialTheme: تم اولیه
- * - transitionMs: مدت زمان transition (ms)
- * - initialSections: بخش‌هایی که از ابتدا باید بک‌گراند داشته باشن (مثلاً ["site"])
+ * - transitionMs: مدت زمان transition (ms) — این مقدار می‌تواند از prop بالاتر تغییر کند
+ * - initialSections: بخش‌هایی که از ابتدا باید لایه داشته باشند (مثلاً ["site"])
  */
 export default function useThemeFadeMulti(
   initialTheme = "default",
@@ -31,7 +32,11 @@ export default function useThemeFadeMulti(
   });
 
   useEffect(() => {
-    return () => timersRef.current.forEach(clearTimeout);
+    return () => {
+      // cleanup timers on unmount
+      timersRef.current.forEach((t) => clearTimeout(t));
+      timersRef.current = [];
+    };
   }, []);
 
   const addLayer = (section, newTheme) => {
@@ -46,6 +51,7 @@ export default function useThemeFadeMulti(
 
     setSectionThemes((prev) => ({ ...prev, [section]: newTheme }));
 
+    // small delay to allow the element to mount, then toggle visibility to true -> triggers fade-in
     requestAnimationFrame(() => {
       const t1 = setTimeout(() => {
         setLayers((prev) => ({
@@ -57,6 +63,7 @@ export default function useThemeFadeMulti(
         }));
       }, 20);
 
+      // remove the previous layers that are not the active one after the transition completes
       const t2 = setTimeout(() => {
         setLayers((prev) => ({
           ...prev,
@@ -69,18 +76,36 @@ export default function useThemeFadeMulti(
     });
   };
 
-  // حذف کامل یک بخش (مثلاً hero)
+  /**
+   * removeSection: حذف با fade-out
+   * - ابتدا visible=false (fade-out)
+   * - بعد از transitionMs، عنصر از لایه‌ها و sectionThemes حذف می‌شود
+   */
   const removeSection = (section) => {
     setLayers((prev) => {
-      const copy = { ...prev };
-      delete copy[section];
-      return copy;
+      if (!prev[section]) return prev; // nothing to remove
+      return {
+        ...prev,
+        [section]: (prev[section] || []).map((l) => ({ ...l, visible: false })),
+      };
     });
-    setSectionThemes((prev) => {
-      const copy = { ...prev };
-      delete copy[section];
-      return copy;
-    });
+
+    // schedule actual deletion after transition finishes
+    const t = setTimeout(() => {
+      setLayers((prev) => {
+        const copy = { ...prev };
+        delete copy[section];
+        return copy;
+      });
+      setSectionThemes((prev) => {
+        const copy = { ...prev };
+        delete copy[section];
+        return copy;
+      });
+      timersRef.current = timersRef.current.filter((x) => x !== t);
+    }, transitionMs + 50);
+
+    timersRef.current.push(t);
   };
 
   // تغییر تم کلی (سایت و همه بخش‌های فعال)
@@ -102,7 +127,7 @@ export default function useThemeFadeMulti(
     theme,
     setThemeWithFade,
     setThemeForSection,
-    removeSection,
+    removeSection, // حالا با fade-out واقعی
     layers,
     sectionThemes,
     durationStyle,

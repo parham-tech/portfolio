@@ -1,12 +1,29 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
-const Navbar = ({ theme, setTheme, setThemeForSection, removeSection, themeClasses, transMs, setTransMs, sectionThemes }) => {
+const Navbar = ({
+  theme,
+  setTheme,
+  setThemeForSection,
+  removeSection,
+  themeClasses,
+  transMs,
+  setTransMs,
+  sectionThemes,
+}) => {
   const [isOpen, setIsOpen] = useState(false); // Theme dropdown
   const [mobileOpen, setMobileOpen] = useState(false); // موبایل
-  const [showTransitionControl, setShowTransitionControl] = useState(false); // panel ⚙️
-  const links = ["Home", "about me", "Projects", "skills", "contact"];
+  const [showTransitionControl, setShowTransitionControl] = useState(false); // پنل ⚙️
 
-  // تم فعلی hero (اگه کاربر فعال کرده باشه)
+  const links = [
+    { name: "Home", path: "/" },
+    { name: "About Me", path: "/about" },
+    { name: "Projects", path: "/projects" },
+    { name: "Skills", path: "/skills" },
+    { name: "Contact", path: "/contact" },
+  ];
+
+  // تم فعلی hero (اگه فعال باشد)
   const heroCurrentTheme = sectionThemes?.hero || null;
 
   return (
@@ -36,49 +53,67 @@ const Navbar = ({ theme, setTheme, setThemeForSection, removeSection, themeClass
 
           {/* Dropdown Theme */}
           <ul
-            className={`absolute left-0 mt-2 w-44 p-2 rounded-lg shadow-2xl transition-all duration-300 z-50 ${
-              isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+            className={`absolute left-0 mt-2 w-52 p-2 rounded-lg shadow-2xl transition-all duration-300 z-50 ${
+              isOpen
+                ? "opacity-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 -translate-y-2 pointer-events-none"
             }`}
           >
             {Object.keys(themeClasses).map((t) => (
               <li key={t} className="mb-1 last:mb-0 flex items-center justify-between">
                 <div className="flex-1 pr-2">
                   <button
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md flex items-center justify-between ${
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-300 flex items-center justify-between ${
                       theme === t ? "ring-2 ring-offset-2 ring-indigo-400" : ""
                     } ${themeClasses[t]}`}
                     onClick={() => {
-                      setTheme(t); // تغییر تم کلی (site)
+                      setTheme(t);
                       setIsOpen(false);
                     }}
                   >
-                    <span>{t.charAt(0).toUpperCase() + t.slice(1)}</span>
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
                   </button>
                 </div>
 
-                {/* radio-like circle برای فعال‌سازی hero */}
+                {/* radio برای Hero */}
                 <div className="pl-2">
                   <button
                     aria-label={`Toggle hero background to ${t}`}
-                    title={`Toggle ${t} on hero`}
+                    title={
+                      theme !== t
+                        ? "Only the current site theme can be applied to Hero"
+                        : heroCurrentTheme === t
+                        ? "Click again to reset Hero"
+                        : `Toggle ${t} on Hero`
+                    }
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (theme !== t) return; // فقط تم سایت قابل فعال سازی است
                       if (heroCurrentTheme === t) {
-                        // همون radio دوباره کلیک شد → خاموش بشه
                         removeSection?.("hero");
                       } else {
-                        // اول hero رو خاموش کن بعد فقط این تم رو بزن
-                        removeSection?.("hero");
                         setThemeForSection?.("hero", t);
                       }
                     }}
-                    className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white/40 hover:scale-105 transition-transform"
+                    disabled={theme !== t}
+                    className={`flex items-center justify-center w-8 h-8 rounded-full border-2 border-white/40 transition-transform
+                      ${theme !== t ? "opacity-40 cursor-not-allowed" : "hover:scale-105"}`}
                   >
                     <span
-                      className={`block w-4 h-4 rounded-full ${
-                        heroCurrentTheme === t ? "bg-white" : "bg-transparent"
-                      } transition-all`}
-                    />
+                      className={`block w-4 h-4 rounded-full relative transition-all duration-300
+                        transform ${heroCurrentTheme === t ? "scale-110 bg-white" : theme !== t ? "bg-gray-600/50 scale-100" : "bg-transparent scale-100"}`}
+                    >
+                      {theme !== t && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="absolute w-3 h-3 text-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                        >
+                          <path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-6V8a6 6 0 10-12 0v3H4v12h16V11h-2zm-8 0V8a4 4 0 118 0v3H10z" />
+                        </svg>
+                      )}
+                    </span>
                   </button>
                 </div>
               </li>
@@ -86,7 +121,7 @@ const Navbar = ({ theme, setTheme, setThemeForSection, removeSection, themeClass
           </ul>
         </div>
 
-        {/* دکمه ⚙️ تنظیمات */}
+        {/* ⚙️ تنظیمات transition */}
         <div className="relative">
           <button
             className={`px-3 py-2 rounded-lg cursor-pointer text-white shadow-lg transition-all duration-300 hover:scale-105 ${themeClasses[theme]}`}
@@ -96,7 +131,6 @@ const Navbar = ({ theme, setTheme, setThemeForSection, removeSection, themeClass
             ⚙️
           </button>
 
-          {/* پنل کوچک اسلایدر */}
           <div
             className={`absolute top-full mt-1 left-0 w-48 p-2 bg-gray-800 rounded shadow-lg z-50 transform transition-all duration-200 origin-top-left
               ${showTransitionControl ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0 pointer-events-none"}`}
@@ -121,17 +155,17 @@ const Navbar = ({ theme, setTheme, setThemeForSection, removeSection, themeClass
       {/* سمت راست: لینک‌ها */}
       <div className="hidden md:flex gap-6 items-center">
         {links.map((link) => (
-          <a
-            key={link}
-            href={`#${link.toLowerCase().replace(/\s+/g, "")}`}
+          <Link
+            key={link.name}
+            to={link.path}
             className="text-white font-medium hover:text-yellow-200 transition-colors"
           >
-            {link}
-          </a>
+            {link.name}
+          </Link>
         ))}
       </div>
 
-      {/* موبایل - همبرگر */}
+      {/* موبایل */}
       <div className="md:hidden">
         <button onClick={() => setMobileOpen((s) => !s)}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,18 +174,17 @@ const Navbar = ({ theme, setTheme, setThemeForSection, removeSection, themeClass
         </button>
       </div>
 
-      {/* منوی موبایل */}
       {mobileOpen && (
         <div className="absolute top-16 right-6 bg-gray-800 p-4 rounded-lg shadow-lg flex flex-col gap-4 md:hidden z-40">
           {links.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase().replace(/\s+/g, "")}`}
+            <Link
+              key={link.name}
+              to={link.path}
               className="text-white hover:text-yellow-200"
               onClick={() => setMobileOpen(false)}
             >
-              {link}
-            </a>
+              {link.name}
+            </Link>
           ))}
         </div>
       )}
