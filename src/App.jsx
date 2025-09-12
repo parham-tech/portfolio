@@ -37,18 +37,28 @@ function App() {
     dark: "bg-gray-800",
   };
 
+  const skillsClasses = {
+    default: "bg-skills-day",
+    retro: "bg-skills-green",
+    cyberpunk: "bg-skills-purple",
+    valentine: "bg-skills-pink",
+    dark: "bg-skills-gray",
+  };
+
   return (
     <Router>
       {/* بک‌گراند سایت */}
       {layers.site?.map((l) => (
         <div
           key={l.id}
-          className={`absolute inset-0 pointer-events-none transition-opacity ${l.visible ? "opacity-100" : "opacity-0"} ${themeClasses[l.theme]}`}
+          className={`fixed inset-0 pointer-events-none transition-opacity ${
+            l.visible ? "opacity-100" : "opacity-0"
+          } ${themeClasses[l.theme]}`}
           style={durationStyle}
         />
       ))}
 
-      <div className="relative z-10 min-h-screen">
+      <div className="app-container relative z-10 min-h-screen">
         {/* Navbar */}
         <Navbar
           theme={theme}
@@ -62,18 +72,19 @@ function App() {
           sectionThemes={sectionThemes}
         />
 
-        {/* Routes */}
         <Routes>
+          {/* Home Page */}
           <Route
             path="/"
             element={
               <>
-                {/* Hero فقط روی صفحه Home */}
                 <div className="relative min-h-[60vh] overflow-hidden mt-6">
                   {layers.hero?.map((l) => (
                     <div
                       key={l.id}
-                      className={`absolute inset-0 transition-opacity ${l.visible ? "opacity-100" : "opacity-0"} ${heroClasses[l.theme]}`}
+                      className={`absolute inset-0 transition-opacity ${
+                        l.visible ? "opacity-100" : "opacity-0"
+                      } ${heroClasses[l.theme]}`}
                       style={durationStyle}
                     />
                   ))}
@@ -85,7 +96,28 @@ function App() {
               </>
             }
           />
-          <Route path="/skills" element={<Skills />} />
+
+          {/* Skills Page */}
+          <Route
+            path="/skills"
+            element={
+              <div className="relative min-h-[80vh] overflow-hidden flex items-center justify-center">
+                {layers.skills?.map((l) => (
+                  <div
+                    key={l.id}
+                    className={`absolute inset-0 transition-opacity ${
+                      l.visible ? "opacity-100" : "opacity-0"
+                    } ${skillsClasses[l.theme]}`}
+                    style={durationStyle}
+                  />
+                ))}
+                <div className="relative z-10 w-full max-w-6xl px-6">
+                  <Skills />
+                </div>
+              </div>
+            }
+          />
+
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>

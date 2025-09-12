@@ -16,7 +16,6 @@
   .bg-pink-gradient {
     background: linear-gradient(to left,#FF6EB4,#FF1493);
   }
- 
 
   /* بک‌گراند مخصوص Hero */
   .bg-hero-day {
@@ -32,34 +31,39 @@
     background: linear-gradient(to right, #c8236b, #e470bf);
   }
 
-}
-
-@keyframes diagonal {
-  0% {
-    transform: translate(0, 0);
+  /* بک‌گراند مخصوص Skills */
+  .bg-skills-day {
+    background: linear-gradient(to right,rgb(171 203 255));
   }
-  100% {
-    transform: translate(20px, 20px); /* حرکت مورب: 50px راست و 50px پایین */
+  .bg-skills-green {
+    background: linear-gradient(to right,rgb(233 255 242));
+  }
+  .bg-skills-purple {
+    background: linear-gradient(to right,rgb(235 231 241));
+  }
+  .bg-skills-pink {
+    background: linear-gradient(to right,rgb(254 230 252));
+  }
+  .bg-skills-gray {
+    background: linear-gradient(to right,rgb(202 202 202));
   }
 }
 
-.animate-diagonal {
-  animation: diagonal 6s linear infinite alternate;
-}
-
-
-
+/* ریشه و فونت‌ها */
 html, body, #root {
   @apply font-sans antialiased;
-   margin: 0;
+  margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
+}
+
+/* کانتینر برای محدود کردن محتوا به جای ریشه */
+.app-container {
   max-width: 1400px;
-  max-height: 900px;
   margin: 0 auto;
-
-
+  width: 100%;
+  min-height: 100vh;
 }
 
 a {
@@ -70,12 +74,10 @@ a:hover {
   color: #535bf2;
 }
 
-
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
-
 
 button:hover {
   border-color: #646cff;
@@ -86,14 +88,7 @@ button:focus-visible {
 }
 
 @media (prefers-color-scheme: light) {
-
   a:hover {
     color: #747bff;
   }
-  
 }
-
-/* index.css */
-
-
-
