@@ -1,25 +1,36 @@
-const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
+// pages/api/chart.js
 
 export default async function handler(req, res) {
+  const { id, days = 7 } = req.query;
+
+  if (!id) {
+    return res.status(400).json({ error: "Missing coin id" });
+  }
+
+  const API_KEY = process.env.COINGECKO_API_KEY;
+  if (!API_KEY) {
+    return res.status(500).json({ error: "API key is missing in server environment" });
+  }
+
   try {
-    const { id, days = 7 } = req.query;
-    if (!id) return res.status(400).json({ error: "id required" });
+    const url = new URL(`https://api.coingecko.com/api/v3/coins/${id}/market_chart`);
+    url.searchParams.set("vs_currency", "usd");
+    url.searchParams.set("days", days);
 
-    const url = `${COINGECKO_BASE}/coins/${id}/market_chart?vs_currency=usd&days=${days}&interval=hourly`;
+    const response = await fetch(url.toString(), {
+      headers: {
+        "x-cg-demo-api-key": API_KEY, // Demo API key goes here
+      },
+    });
 
-    const response = await fetch(url);
     if (!response.ok) {
-      return res.status(response.status).json({ error: response.statusText });
+      return res.status(response.status).json({ error: `CoinGecko API error ${response.status}` });
     }
-    const raw = await response.json();
 
-    // فرمت ساده برای فرانت
-    const labels = raw.prices.map((p) => new Date(p[0]).toISOString());
-    const prices = raw.prices.map((p) => p[1]);
-
-    res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate");
-    res.status(200).json({ labels, prices });
+    const data = await response.json();
+    return res.status(200).json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Server error" });
+    console.error("Chart API failed:", err);
+    return res.status(500).json({ error: "Failed to fetch chart data" });
   }
 }
