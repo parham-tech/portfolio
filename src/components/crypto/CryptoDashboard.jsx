@@ -33,6 +33,7 @@ export default function CryptoDashboard({
   chartCacheTtlMs = DEFAULT_CHART_CACHE_TTL,
   theme,
   themeClasses = {},
+  apiBase = "/api",
 }) {
   const [coins, setCoins] = useState([]);
   const [loadingCoins, setLoadingCoins] = useState(true);
@@ -76,7 +77,7 @@ export default function CryptoDashboard({
       coinsAbortRef.current = new AbortController();
       const signal = coinsAbortRef.current.signal;
 
-      const url = `/api/coins?page=${page}&perPage=${perPage}`;
+ const url = `${apiBase}/coins?page=${page}&perPage=${perPage}`;
 
       try {
         const res = await fetch(url, { signal });
@@ -130,7 +131,7 @@ export default function CryptoDashboard({
       setChartLoading(true);
       setChartError(null);
       try {
-        const url = `/api/chart?id=${selected.id}&days=${days}`;
+        const url = `${apiBase}/chart?id=${selected.id}&days=${days}`;
         const res = await fetch(url, { signal });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         const raw = await res.json();
